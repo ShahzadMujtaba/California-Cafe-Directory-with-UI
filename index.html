@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>California Cafe Directory</title>
+  <link rel="stylesheet" href="/css/bootstrap.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12" id="header-wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="col-12" id="header">
+              <h2 style="color: white;">
+                California Cafe Directory
+              </h2>
+            </div>
+            <div class="col-12" id="search-wrapper">
+              <input type="text" onkeyup="getplaces()" id="myInput" placeholder="Search your favorite cafes!" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-12" id="table-wrapper">
+            <table>
+              <thead style="background-color: green;">
+                <tr class="table100-head">
+                  <th class="column1">S No</th>
+                  <th class="column2">Cafe Name</th>
+                  <th class="column3">Address</th>
+                  <th class="column4">Postal Code</th>
+                  <th class="column5">Lat</th>
+                  <th class="column6">Long</th>
+                </tr>
+              </thead>
+              <tbody id="myTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+
+  async function fetchData(url) {
+    const data = await fetch(url);
+    const jsonData = await data.json();
+    return jsonData;
+  }
+
+  function findCaliforniaCafes(string, cafes, places) {
+    // Search Cafe Name in cafes Array
+    let searchCafeName = [];
+    searchName = cafes.forEach((cafeNameId) => {
+      if (cafeNameId.name.includes(string)) {
+        searchCafeName.push(cafeNameId);
+      }
+    });
+    // Search Cafe Places and add cafe name in obj
+    let results = [];
+    searchId = searchCafeName.forEach((cafeNameId) => {
+      places.forEach((cafeId) => {
+        if (cafeId.id.includes(cafeNameId.location_id)) {
+          data = {
+            name: cafeNameId.name,
+            street_no: cafeId.street_no,
+            locality: cafeId.locality,
+            postal_code: cafeId.postal_code,
+            lat: cafeId.lat,
+            long: cafeId.long,
+          };
+          results.push(data);
+        }
+      });
+    });
+    return results;
+
+  }
+
+
+  async function getplaces() {
+
+    var substring = document.getElementById('myInput').value
+
+    const places = await fetchData(
+      "https://raw.githubusercontent.com/debojyoti/places-fake-rest-api/master/places.json"
+    );
+    const placesArray = places.places;
+    const cafes = await fetchData(
+      "https://raw.githubusercontent.com/debojyoti/places-fake-rest-api/master/cafes.json"
+    );
+    const cafesArray = cafes.cafes;
+
+    let resultArray = findCaliforniaCafes(substring, cafesArray, placesArray);
+
+    let table = document.getElementById("myTable");
+
+    for (let i = 0; i < resultArray.length; i++) {
+      let j = 1;
+      var row = `<tr>
+                  <td class="column1">${(j += i)}</td>
+                  <td class="column2">${resultArray[i].name}</td>
+                  <td class="column3">${resultArray[i].street_no}</td>
+                  <td class="column4">${resultArray[i].locality}</td>
+                  <td class="column5">${resultArray[i].postal_code}</td>
+                  <td class="column6">${resultArray[i].lat}</td>
+                  <td class="column7">${resultArray[i].long}</td>
+                </tr>`;
+      table.innerHTML += row;
+
+    }
+
+    let tr = table.getElementsByTagName("tr");
+
+    for (let i = 0; i < tr.length; i++) {
+      let td = tr[i].getElementsByTagName('td')[1]
+      if (td) {
+        let textValue = td.textContent || td.innerHTML
+        if ((textValue.toLowerCase().indexOf(substring.toLowerCase()) > -1)) {
+          tr[i].style.display = ""
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+
+
+  }
+
+  getplaces();
+</script>
